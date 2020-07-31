@@ -1,0 +1,113 @@
+#include"reg52.h"
+#include<intrins.h>
+typedef unsigned char u8;
+typedef unsigned int u16;
+u8 code smgduan[17]={0x3f,0x06,0x5b,0x4f,0x66,0x6d,0x7d,0x07,0x7f,0x6f,0x77,0x7c,0x39,0x5e,0x79,0x71};
+sbit LSA=P2^2;
+sbit LSB=P2^3;
+sbit LSC=P2^4;
+
+//按键模块
+sbit k1=P3^1;
+sbit k3=P3^2;
+//以下为计时模块
+void delay(u16 i) //i=1,us
+{
+while(i--);
+}
+void start(u16 c[])
+{
+    u8 i;
+	for(i=0;i<8;i++)
+	{
+		switch(i)	 
+		{
+			case(0):
+				LSA=0;LSB=0;LSC=0; break;
+			case(1):
+				LSA=1;LSB=0;LSC=0; break;
+			case(2):
+				LSA=0;LSB=1;LSC=0; break;
+			case(3):
+				LSA=1;LSB=1;LSC=0; break;
+			case(4):
+				LSA=0;LSB=0;LSC=1; break;
+			case(5):
+				LSA=1;LSB=0;LSC=1; break;
+			case(6):
+				LSA=0;LSB=1;LSC=1; break;
+			case(7):
+				LSA=1;LSB=1;LSC=1; break;	
+		}
+		P0=smgduan[c[i]];
+		delay(50);
+		P0=0x00;
+		
+}
+}
+void buchang(u16 a[])
+{
+  u16 temp=0;
+  int b;
+  int sum;
+   sum=a[0]+a[1]*10+a[2]*100+a[3]*1000+a[4]*10000+a[5]*100000+a[6]*1000000+a[7]*10000000+3;
+   for(b=0;b<8;b++)
+   {
+   a[b]=sum%10;
+   sum=sum/10;
+   }
+}
+void number(u16 a[])
+{
+  u16 temp=0;
+  int b;
+  int suml;
+  int sumh;
+  int sumw;
+  int sum;
+   sum=a[0]+a[1]*10+a[2]*100+a[3]*1000+a[4]*6000+a[5]*60000+a[6]*360000+a[7]*3600000+2;
+   suml=sum/100%60;
+   sumh=sum/6000%60;
+   sumw=sum/360000%24;
+   a[0]=sum%10;
+   a[1]=sum/10%10;
+   a[2]=suml%10;
+   a[3]=suml/10%10;
+   a[4]=sumh%10;
+   a[5]=sumh/10%10;
+   a[6]=sumw%10;
+   a[7]=sumw/10%10;
+}
+void kaishi()
+{  u16 dign[10]={0,0,0,0,0,0,0,0,0,0};
+ while(1)
+ { 
+ number(dign);delay(800);
+ start(dign);
+ delay(1000);
+ if(k3==0)
+ {delay(100);
+  break;}
+ }
+ }
+ void keypros()
+{
+	if(k1==0)		  
+	{	
+		delay(1000);   
+		if(k1==0)	 
+		{
+			kaishi();	  
+		}
+		while(!k1);	 
+	}		
+}
+void main()
+{
+ int i=0;
+ u16 dign[10]={0,0,0,0,0,0,0,0,0,0};
+ while(1){
+ start(dign);
+ keypros();	}
+}
+
